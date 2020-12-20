@@ -1,0 +1,37 @@
+{
+  "V": {
+    "0": {
+      "key": 0,
+      "tag": 0,
+      "node_weight": 0.0,
+      "info": "White"
+    },
+    "1": {
+      "key": 1,
+      "tag": 0,
+      "node_weight": 0.0,
+      "info": "White"
+    }
+  },
+  "E": {
+    "0": {
+      "1": {
+        "src": 0,
+        "dest": 1,
+        "weight": 0.01,
+        "tag": 0
+      }
+    },
+    "1": {
+      "0": {
+        "src": 1,
+        "dest": 0,
+        "weight": 0.41,
+        "tag": 0
+      }
+    }
+  },
+  "Mc": 4,
+  "nodeSize": 2,
+  "edgeSize": 2
+}
