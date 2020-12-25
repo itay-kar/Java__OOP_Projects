@@ -1,8 +1,6 @@
 package api;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.w3c.dom.Node;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -10,7 +8,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DS_DWGraphTest {
+class _DWGraphDSTest {
 directed_weighted_graph small_graph;
 
     @NotNull
@@ -18,13 +16,13 @@ directed_weighted_graph small_graph;
         DecimalFormat round = new DecimalFormat("##.##");
         round.setRoundingMode(RoundingMode.DOWN);
         Random rand = new Random(seed);
-        directed_weighted_graph g = new DS_DWGraph();
+        directed_weighted_graph g = new DWGraph_DS();
         int node1, node2;
         double tag;
 
 
         while (g.nodeSize() < v) {
-            node_data x = new DS_DWGraph.Node_data();
+            node_data x = new DWGraph_DS.Node_data();
             g.addNode(x);
         }
 
@@ -43,7 +41,7 @@ directed_weighted_graph small_graph;
 
     @org.junit.jupiter.api.Test
     void getNode() {
-        node_data x = new DS_DWGraph.Node_data();
+        node_data x = new DWGraph_DS.Node_data();
         int check = x.getKey();
         small_graph =  graphCreator(3 , 2 , 1);
         small_graph.addNode(x);
@@ -69,7 +67,7 @@ directed_weighted_graph small_graph;
     @org.junit.jupiter.api.Test
     void addNode() {
         small_graph=graphCreator(3,4,1);
-        node_data n = new DS_DWGraph.Node_data();
+        node_data n = new DWGraph_DS.Node_data();
         small_graph.addNode(n);
 
         assertEquals(n , small_graph.getNode(3));

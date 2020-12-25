@@ -9,18 +9,18 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class Algo_DWGraphTest {
+class _DWGraphAlgoTest {
 
     public static directed_weighted_graph graphCreator(int v, int e, int seed) {
         DecimalFormat round = new DecimalFormat("##.##");
         round.setRoundingMode(RoundingMode.DOWN);
         Random rand = new Random(seed);
-        directed_weighted_graph g = new DS_DWGraph();
+        directed_weighted_graph g = new DWGraph_DS();
         int node1, node2;
         double tag;
 
         while (g.nodeSize() < v) {
-            DS_DWGraph.Node_data x = new DS_DWGraph.Node_data();
+            DWGraph_DS.Node_data x = new DWGraph_DS.Node_data();
             g.addNode(x);
         }
 
@@ -38,7 +38,7 @@ class Algo_DWGraphTest {
 
     @Test
     void init() {
-        dw_graph_algorithms check = new Algo_DWGraph();
+        dw_graph_algorithms check = new DWGraph_Algo();
         directed_weighted_graph root = graphCreator(3, 2, 1);
         check.init(root);
 
@@ -47,7 +47,7 @@ class Algo_DWGraphTest {
 
     @Test
     void getGraph() {
-        dw_graph_algorithms check = new Algo_DWGraph();
+        dw_graph_algorithms check = new DWGraph_Algo();
         directed_weighted_graph root = graphCreator(2, 1, 1);
         check.init(root);
 
@@ -56,7 +56,7 @@ class Algo_DWGraphTest {
 
     @Test
     void copy() {
-        dw_graph_algorithms check = new Algo_DWGraph();
+        dw_graph_algorithms check = new DWGraph_Algo();
         directed_weighted_graph root = graphCreator(100, 100, 1);
         check.init(root);
 
@@ -69,7 +69,7 @@ class Algo_DWGraphTest {
 
     @Test
     void isConnected() {
-        dw_graph_algorithms check = new Algo_DWGraph();
+        dw_graph_algorithms check = new DWGraph_Algo();
         directed_weighted_graph root = graphCreator(5, 5, 1);
         root.connect(4, 1, 2);
         root.connect(2, 1, 2);
@@ -98,7 +98,7 @@ class Algo_DWGraphTest {
 
     @Test
     void shortestPathDist() {
-        dw_graph_algorithms check = new Algo_DWGraph();
+        dw_graph_algorithms check = new DWGraph_Algo();
         directed_weighted_graph root = graphCreator(10, 20, 1);
 
         check.init(root);
@@ -109,7 +109,7 @@ class Algo_DWGraphTest {
     @Test
     void shortestPath() {
 
-        dw_graph_algorithms check = new Algo_DWGraph();
+        dw_graph_algorithms check = new DWGraph_Algo();
         directed_weighted_graph root = graphCreator(10, 20, 1);
         check.init(root);
         List<node_data> sp = check.shortestPath(1, 8);
@@ -120,14 +120,17 @@ class Algo_DWGraphTest {
             assertEquals(n.getKey(), checkKey[i]);
             i++;
         }
+
+        ;
     }
 
     @Test
     void save_load() {
         directed_weighted_graph g0 = graphCreator(500, 10000, 1);
-        dw_graph_algorithms ag0 = new Algo_DWGraph();
+        dw_graph_algorithms ag0 = new DWGraph_Algo();
         ag0.init(g0);
-        String str = "Graph_json.json";
+        String str = "Try.json";
+
         ag0.save(str);
         directed_weighted_graph g1 = graphCreator(500, 10000, 1);
         assertTrue(ag0.load(str));

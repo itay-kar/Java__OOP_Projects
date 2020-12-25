@@ -1,9 +1,6 @@
 package gameClient;
 
-import api.directed_weighted_graph;
-import api.edge_data;
-import api.geo_location;
-import api.node_data;
+import api.*;
 import gameClient.util.Point3D;
 import gameClient.util.Range;
 import gameClient.util.Range2D;
@@ -121,7 +118,9 @@ public class Arena {
 			while(iter.hasNext()) {
 				edge_data e = iter.next();
 				boolean f = isOnEdge(fr.getLocation(), e,fr.getType(), g);
-				if(f) {fr.set_edge(e);}
+				if(f) {
+					fr.set_edge(e);
+				}
 			}
 		}
 	}
@@ -174,5 +173,15 @@ public class Arena {
 		Range2Range ans = new Range2Range(world, frame);
 		return ans;
 	}
+
+	public void setPokemonsPos() {
+		Iterator<CL_Pokemon> clPokemonIterator = _pokemons.listIterator();
+		for (int a = 0; a < _pokemons.size(); a++){
+			updateEdge(_pokemons.get(a),_gg);
+
+		}
+
+	}
+
 
 }

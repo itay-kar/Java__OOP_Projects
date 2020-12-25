@@ -1,5 +1,6 @@
 package gameClient;
 
+import api.DWGraph_DS;
 import api.edge_data;
 import gameClient.util.Point3D;
 import org.json.JSONObject;
@@ -39,7 +40,12 @@ public class CL_Pokemon {
 	}
 
 	public void set_edge(edge_data _edge) {
-		this._edge = _edge;
+		if(_edge==null){
+			this._edge = null;
+		}
+		else {
+			this._edge = new DWGraph_DS.Edge_data(_edge);
+		}
 	}
 
 	public Point3D getLocation() {
@@ -65,3 +71,4 @@ public class CL_Pokemon {
 		this.min_ro = min_ro;
 	}
 }
+

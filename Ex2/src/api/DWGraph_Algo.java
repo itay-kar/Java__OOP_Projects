@@ -3,12 +3,11 @@ package api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-
 import java.io.*;
 import java.util.*;
 
-public class Algo_DWGraph implements dw_graph_algorithms {
-    directed_weighted_graph graph = new DS_DWGraph();
+public class DWGraph_Algo implements dw_graph_algorithms {
+    directed_weighted_graph graph = new DWGraph_DS();
     Queue<node_data> nodeQueue;
     PriorityQueue<node_data> edgesQueue;
     Iterator<edge_data> edgeSearch;
@@ -27,7 +26,7 @@ public class Algo_DWGraph implements dw_graph_algorithms {
 
     @Override
     public directed_weighted_graph copy() {
-        directed_weighted_graph temp = new DS_DWGraph();
+        directed_weighted_graph temp = new DWGraph_DS();
 
         for (node_data current_node : graph.getV()
         ) {
@@ -47,7 +46,7 @@ public class Algo_DWGraph implements dw_graph_algorithms {
     }
 
     public directed_weighted_graph copy2() {
-        directed_weighted_graph temp = new DS_DWGraph();
+        directed_weighted_graph temp = new DWGraph_DS();
 
         for (node_data current_node : graph.getV()
         ) {
@@ -78,14 +77,13 @@ public class Algo_DWGraph implements dw_graph_algorithms {
             return false;
         }
 
-
-        while (nodeSearch.hasNext()) {
-            node_data current = nodeSearch.next();
-            f = check_b(temp, current.getKey(), n.getKey());
-            if (!f) {
-                return false;
-            }
+        DWGraph_Algo tempalgo = new DWGraph_Algo();
+        tempalgo.init(temp);
+        f = tempalgo.check_a(n);
+        if (!f) {
+            return false;
         }
+
 
         return true;
 
@@ -162,6 +160,62 @@ public class Algo_DWGraph implements dw_graph_algorithms {
     }
 
 
+    public void setBellmanFord(int source) {
+        directed_weighted_graph g = this.graph;
+        nodeSearch = this.graph.getV().iterator();
+        node_data src = graph.getNode(source);
+        src.setWeight(0);
+
+
+        for (node_data node : this.graph.getV()) {
+            if (node != src) {
+                node.setWeight(Double.POSITIVE_INFINITY);
+            }
+        }
+
+
+            for (int i = 0; i < graph.nodeSize(); i++) {
+                update(src);
+            }
+
+
+        }
+
+
+
+    private void update(node_data src) {
+
+        node_data currentSrc;
+        node_data currentDest;
+        Stack<node_data> nodesStack = new Stack<>();
+        edgeSearch = graph.getE(src.getKey()).iterator();
+        nodesStack.add(src);
+        setInfo("White");
+
+
+        while (!nodesStack.isEmpty()) {
+            node_data current = nodesStack.pop();
+            current.setInfo("Black");
+
+            for (edge_data edge : graph.getE(current.getKey())
+            ) {
+                double w = graph.getNode(edge.getSrc()).getWeight() + edge.getWeight();
+                double vertexW = graph.getNode(edge.getDest()).getWeight();
+                if (w < vertexW) {
+                    graph.getNode(edge.getDest()).setWeight(w);
+                    graph.getNode(edge.getDest()).setTag(edge.getSrc());
+                }
+                if (graph.getNode(edge.getDest()).getInfo() == "White") {
+                    nodesStack.add(graph.getNode(edge.getDest()));
+                    graph.getNode(edge.getDest()).setInfo("Grey");
+                }
+            }
+        }
+
+
+    }
+
+
     @Override
     public double shortestPathDist(int src, int dest) {
         setInfo("White");
@@ -213,7 +267,7 @@ public class Algo_DWGraph implements dw_graph_algorithms {
             ) {
                 if (currentEdge.getDest() == dest) {
                     this.graph.getNode(dest).setTag(current.getKey());
-                    this.graph.getNode(dest).setWeight(current.getWeight()+currentEdge.getWeight());
+                    this.graph.getNode(dest).setWeight(current.getWeight() + currentEdge.getWeight());
                     edgesQueue.clear();
                     break;
                 }
@@ -249,8 +303,8 @@ public class Algo_DWGraph implements dw_graph_algorithms {
         List<node_data> templist = new LinkedList<>();
 
 
-        for (int i=0 , j = path.size()-1 ; j>=0 ; i++ , j-- ){
-            templist.add(i,path.get(j));
+        for (int i = 0, j = path.size() - 1; j >= 0; i++, j--) {
+            templist.add(i, path.get(j));
         }
 
         return templist;
@@ -258,30 +312,26 @@ public class Algo_DWGraph implements dw_graph_algorithms {
 
     @Override
     public boolean save(String file) {
-        Gson graph_json= new GsonBuilder().setPrettyPrinting().create();
+        Gson graph_json = new GsonBuilder().setPrettyPrinting().create();
         String json = graph_json.toJson(graph);
 
-
+        /**
+         // write object to file
+         PrintWriter graph_Out =new PrintWriter(new File(file));
+         graph_Out.write(json);
+         graph_Out.close();*/
 
         try {
             FileWriter x = new FileWriter(file);
             x.write(json);
             x.close();
 
-
-            /**
-             // write object to file
-             PrintWriter graph_Out =new PrintWriter(new File(file));
-             graph_Out.write(json);
-             graph_Out.close();*/
             return true;
-
         }
 
-          catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        catch (IOException e) {
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
@@ -289,31 +339,40 @@ public class Algo_DWGraph implements dw_graph_algorithms {
 
     @Override
     public String toString() {
-        Gson graph_json= new GsonBuilder().setPrettyPrinting().create();
+        Gson graph_json = new GsonBuilder().setPrettyPrinting().create();
         String json = graph_json.toJson(graph);
         return json;
     }
 
     @Override
     public boolean load(String file) {
+        try {
+            GsonBuilder builder = new GsonBuilder();
+            builder.registerTypeAdapter(DWGraph_DS.class, new GraphDecoder());
+            Gson gson = builder.create();
 
-            try {
-                GsonBuilder builder = new GsonBuilder();
-                builder.registerTypeAdapter(DS_DWGraph.class, new graphJsonDecoder());
-                Gson gson = builder.create();
-
-                FileReader reader = new FileReader(file);
-                directed_weighted_graph temp = gson.fromJson(reader, DS_DWGraph.class);
-                init(temp);
-                return true;
-            }
-
-            catch (FileNotFoundException e) {
-                e.printStackTrace();
-                return false;
-            }
+            FileReader reader = new FileReader(file);
+            String s = reader.toString();
+            directed_weighted_graph temp = toGraph(s);
+            init(temp);
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
+
+    public directed_weighted_graph toGraph(String g) {
+        directed_weighted_graph graph = new DWGraph_DS();
+        GsonBuilder GsonBuilder = new GsonBuilder();
+        GsonBuilder.registerTypeAdapter(DWGraph_DS.class, new GraphDecoder());
+        Gson gson = GsonBuilder.create();
+
+        graph = gson.fromJson(g, DWGraph_DS.class);
+
+        return graph;
+    }
 
 
 }
