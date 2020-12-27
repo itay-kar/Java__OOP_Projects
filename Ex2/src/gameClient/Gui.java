@@ -25,6 +25,7 @@ public class Gui extends JFrame implements ActionListener {
         ImageIcon icon = new ImageIcon("C:\\Software development\\Java Directory\\Tasks\\Java-Projects\\Java__OOP_Projects\\Ex2\\photos\\pickachujpg.jpg");
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize().width - (int) (Toolkit.getDefaultToolkit().getScreenSize().width * 0.75), Toolkit.getDefaultToolkit().getScreenSize().height - (int) (Toolkit.getDefaultToolkit().getScreenSize().height * 0.60));
         id.setText("Please Enter Id\n");
+        this.setIconImage(icon.getImage());
         id.setBounds(50, 50, 100, 100);
         level.setText("Enter level number between 0-23\n");
         level.setBounds(50, 70, 100, 100);
