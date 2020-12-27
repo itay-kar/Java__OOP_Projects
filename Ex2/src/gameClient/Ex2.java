@@ -8,9 +8,13 @@ import gameClient.util.Point3D;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
+import java.util.List;
 
 public class Ex2 implements Runnable {
     private static DWGraph_Algo graphAlgo = new DWGraph_Algo();
@@ -18,11 +22,44 @@ public class Ex2 implements Runnable {
     private static Arena _ar;
     private static HashMap<Integer, HashMap<Integer, Integer>> routeMap = new HashMap<>();
     private static HashMap<Integer, CL_Pokemon> AgentsNextPoke = new HashMap<>();
+    public static String gameLevel;
+    public static String id;
 
     public static void main(String[] a) {
-        Thread client = new Thread(new Ex2());
-        client.start();
+
+
+        if(a.length>0){
+     if(isCorrect(a)){
+         id = a[0];
+         gameLevel = a[1];
+         Thread client = new Thread(new Ex2());
+         client.start();}
+     }
+        else {
+Gui gamestarter = new Gui();
+            }
+        }
+
+
+    private static boolean isCorrect(String[] a) {
+        if(a!=null && a.length==2){
+            String s = a[0];
+            String n = a[1];
+
+            if (s.length()==9 & n.length()<=2 && n.length()>0){
+                for (char c:s.toCharArray()
+                     ) {
+                    if(!(Integer.valueOf(c)>=0 && Integer.valueOf(c)<=9)){
+                        return false;
+                    }
+                }
+            }
+
+            if(Integer.valueOf(n)<0 || Integer.valueOf(n)>23){return false;}
+        }
+        return true;
     }
+
 
     /**
      * Moves each of the agents along the edge,
@@ -85,19 +122,19 @@ public class Ex2 implements Runnable {
         }
 
 
-
         for (int i = 0; i < pokList.size(); i++) {
             CL_Pokemon current = pokList.get(i);
-            if (!currentisVisited(current , agentId)) {
+            if (!currentisVisited(current, agentId)) {
                 temp = algo.shortestPathDist(src, current.get_edge().getDest());
                 if (temp > 0 && temp < distance) {
                     distance = temp;
                     pokdest = current.get_edge().getDest();
                     pokesrc = current.get_edge().getSrc();
                     nextPoke = current;
-                   currentAgent.set_curr_fruit(current);
+                    currentAgent.set_curr_fruit(current);
                 }
-            }}
+            }
+        }
 
 
         for (CL_Pokemon pok : pokList
@@ -105,84 +142,102 @@ public class Ex2 implements Runnable {
             if (pok.get_edge() == nextPoke.get_edge()) {
                 pok.setMin_ro(agentId);
                 pok.setMin_dist(2);
-            } else if(nextPoke.getMin_dist()!=2){
+            } else if (nextPoke.getMin_dist() != 2) {
                 pok.setMin_ro(-1);
-            }}
-
-
-        int n = HasPokeBefore(src , nextPoke);
-if(routeMap.get(src).get(pokdest)!=null) {
-    dest = routeMap.get(src).get(pokdest);
-    if(dest==src && currentAgent.get_curr_fruit().get_edge().getDest()==src){
-        return routeMap.get(src).get(currentAgent.get_curr_fruit().get_edge().getSrc());
-    }
-}
-
-        return dest;
-    }
-
-    private static boolean currentisVisited(CL_Pokemon current, int agentId) {
-
-        for (CL_Agent agent: _ar.getAgents()
-             ) {
-            if(agent.get_curr_fruit()==current && agent.getID()!=agentId){
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private static int HasPokeBefore(int src, CL_Pokemon nextPoke) {
-
-        for (CL_Pokemon poke: _ar.getPokemons()
-             ) {
-            if(poke.get_edge().getDest()==src && poke!=nextPoke){
-                return poke.get_edge().getSrc();
             }
         }
 
-        return -1;
-    }
 
-
-    @Override
-    public void run() {
-        int scenario_num = 1;
-        game_service game = Game_Server_Ex2.getServer(scenario_num); // you have [0,23] games
-        //	int id = 999;
-        //	game.login(id);
-        String g = game.getGraph();
-        String pks = game.getPokemons();
-        directed_weighted_graph gg = graphAlgo.toGraph(g);
-        makeRoutes(gg);
-
-
-
-        init(game);
-
-        for (CL_Agent nextagent : _ar.getAgents()){
-            AgentsNextPoke.put(nextagent.getID() , null);
+        int n = HasPokeBefore(src, nextPoke);
+        if (routeMap.get(src).get(pokdest) != null) {
+            dest = routeMap.get(src).get(pokdest);
+            if (dest == src && currentAgent.get_curr_fruit().get_edge().getDest() == src) {
+                return routeMap.get(src).get(currentAgent.get_curr_fruit().get_edge().getSrc());
+            }
         }
 
-        game.startGame();
-        _win.setTitle("Ex2 - OOP: (NONE trivial Solution) " + game.toString());
-        int ind = 0;
-        long dt = 120;
-        double dtspeed=averageSpeed();
-        while (game.isRunning()) {
-            moveAgants(game, gg);
-            try {
-                if (ind % 1 == 0) {
-                    _win.repaint();
+
+        if (nextPoke.get_edge().getDest() == dest && n != -1) {
+            return n;
+        }
+        if (dest == -1) {
+            if (pokdest != src) {
+                return pokdest;
+            } else if (routeMap.get(src).get(pokesrc) != null) {
+                return routeMap.get(src).get(pokesrc);
+            } else {
+                Iterator<Integer> next = routeMap.get(src).values().iterator();
+                return next.next();
+            }
+        }
+            if (src == pokdest && dest != pokesrc) {
+                return pokesrc;
+            }
+
+            return dest;
+        }
+
+        private static boolean currentisVisited (CL_Pokemon current,int agentId){
+
+            for (CL_Agent agent : _ar.getAgents()
+            ) {
+                if (agent.get_curr_fruit() == current && agent.getID() != agentId) {
+                    return true;
                 }
-               double speed = averageSpeed();
+            }
+            return false;
+        }
 
-                if(speed>1){dt=100;}
-                //if(speed>1.5){dt=70;}
-                if(speed>2){dt=90;}
-                if(speed>3){dt=80;}
-              //  if(speed>3){dt=50;}
+
+        private static int HasPokeBefore ( int src, CL_Pokemon nextPoke){
+
+            for (CL_Pokemon poke : _ar.getPokemons()
+            ) {
+                if (poke.get_edge().getDest() == src && poke != nextPoke) {
+                    return poke.get_edge().getSrc();
+                }
+            }
+
+            return -1;
+        }
+
+
+        @Override
+        public void run () {
+            game_service game = Game_Server_Ex2.getServer(Integer.parseInt(gameLevel)); // you have [0,23] games
+            int loginid = Integer.parseInt(id);
+            game.login(loginid);
+            String g = game.getGraph();
+            String pks = game.getPokemons();
+            directed_weighted_graph gg = graphAlgo.toGraph(g);
+            makeRoutes(gg);
+
+
+            init(game);
+
+            for (CL_Agent nextagent : _ar.getAgents()) {
+                AgentsNextPoke.put(nextagent.getID(), null);
+            }
+
+            game.startGame();
+            _win.setTitle("Ex2 - OOP: (NONE trivial Solution) " + game.toString());
+            int ind = 0;
+            long dt = 120;
+            double dtspeed = averageSpeed();
+            while (game.isRunning()) {
+                moveAgants(game, gg);
+                try {
+                    if (ind % 1 == 0) {
+                        _win.repaint();
+                    }
+                   double speed = averageSpeed();
+                    if(dtspeed<speed){
+                        if(dt>100){dt-=2;}
+                        if(dt>80){dt-=1;}
+                        if(dt>60){dt-=0.5;}
+                        if(dt>40){dt-=0.1;}
+                    }
+                    //  if(speed>3){dt=50;}
               /*  if(dtspeed<speed) {
                     dtspeed = speed;
                     if (dt > 100) {
@@ -190,78 +245,79 @@ if(routeMap.get(src).get(pokdest)!=null) {
                     }
                     else dt=dt-(dt/12*_ar.getAgents().size());
                 }*/
-                Thread.sleep(dt);
-                ind++;
-            } catch (Exception e) {
+                    Thread.sleep(dt);
+                    ind++;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            String res = game.toString();
+
+            System.out.println(res);
+            System.exit(0);
+        }
+
+        private Double averageSpeed () {
+            double averagespeed = 0;
+            for (CL_Agent agent : _ar.getAgents()
+            ) {
+                averagespeed = averagespeed + agent.getSpeed();
+            }
+
+            averagespeed = averagespeed / _ar.getAgents().size();
+
+            return averagespeed;
+        }
+
+
+        private directed_weighted_graph rebuildGraph (String g){
+            directed_weighted_graph temp = new DWGraph_DS();
+            try {
+                GsonBuilder builder = new GsonBuilder();
+                builder.registerTypeAdapter(DWGraph_DS.class, new rebuildGraphDecoder());
+                Gson gson = builder.create();
+
+                FileReader reader = new FileReader(g);
+                temp = gson.fromJson(reader, DWGraph_DS.class);
+
+                return temp;
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-        }
-        String res = game.toString();
-
-        System.out.println(res);
-        System.exit(0);
-    }
-
-    private Double averageSpeed() {
-        double averagespeed=0;
-        for (CL_Agent agent:_ar.getAgents()
-             ) {
-            averagespeed=averagespeed+agent.getSpeed();
-        }
-
-        averagespeed=averagespeed/_ar.getAgents().size();
-
-        return averagespeed;
-    }
-
-
-    private directed_weighted_graph rebuildGraph(String g) {
-        directed_weighted_graph temp = new DWGraph_DS();
-        try {
-            GsonBuilder builder = new GsonBuilder();
-            builder.registerTypeAdapter(DWGraph_DS.class, new rebuildGraphDecoder());
-            Gson gson = builder.create();
-
-            FileReader reader = new FileReader(g);
-            temp = gson.fromJson(reader, DWGraph_DS.class);
-
             return temp;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
-        return temp;
-    }
 
-    private void init(game_service game) {
-        String g = game.getGraph();
-        String fs = game.getPokemons();
-        directed_weighted_graph gg = graphAlgo.toGraph(g);
+        private void init (game_service game){
+            String g = game.getGraph();
+            String fs = game.getPokemons();
+            directed_weighted_graph gg = graphAlgo.toGraph(g);
 
-        graphAlgo.init(gg);
+            graphAlgo.init(gg);
 
 
-        _ar = new Arena();
-        _ar.setGraph(gg);
-        _ar.setPokemons(Arena.json2Pokemons(fs));
-        _win = new MyFrame(_ar, "test Ex2");
-        _win.setSize(1000, 700);
+
+            _ar = new Arena();
+            _ar.setGraph(gg);
+            _ar.setPokemons(Arena.json2Pokemons(fs));
+            _win = new MyFrame(_ar, "test Ex2");
+            _win.setSize(1000, 700);
 
 
-        _win.show();
-        String info = game.toString();
-        JSONObject line;
+            _win.show();
+            String info = game.toString();
+            JSONObject line;
 
-        try {
-            line = new JSONObject(info);
-            JSONObject ttt = line.getJSONObject("GameServer");
-            int rs = ttt.getInt("agents");
-            System.out.println(info);
-            System.out.println(game.getPokemons());
-            List<CL_Pokemon> cl_fs = _ar.getPokemons();
-            for (int a = 0; a < cl_fs.size(); a++) {
-                _ar.updateEdge(cl_fs.get(a), gg);
-            }
-            for (int a =0 ; a<cl_fs.size() ; a++){
+            try {
+                line = new JSONObject(info);
+                JSONObject ttt = line.getJSONObject("GameServer");
+                int rs = ttt.getInt("agents");
+                System.out.println(info);
+                System.out.println(game.getPokemons());
+                List<CL_Pokemon> cl_fs = _ar.getPokemons();
+                for (int a = 0; a < cl_fs.size(); a++) {
+                    _ar.updateEdge(cl_fs.get(a), gg);
+                }
+                for (int a = 0; a < cl_fs.size(); a++) {
                     int ind = a % cl_fs.size();
                     CL_Pokemon c = cl_fs.get(ind);
                     if (c.getMin_ro() != -5) {
@@ -274,47 +330,45 @@ if(routeMap.get(src).get(pokdest)!=null) {
                     }
                 }
 
-            _ar.setAgents(_ar.getAgents(game.getAgents(), gg));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void chooseStartNode(int[] startnodes) {
-        double distancemin = Double.POSITIVE_INFINITY;
-        double distancemax = 0;
-
-
-        }
-
-
-
-
-    private void makeRoutes(directed_weighted_graph gg) {
-        dw_graph_algorithms d = new DWGraph_Algo();
-        d.init(gg);
-
-        for (node_data x : gg.getV()
-        ) {
-            routeMap.put(x.getKey(), new HashMap<>());
-            Iterator<node_data> iter = gg.getV().iterator();
-            while (iter.hasNext()) {
-                node_data current = iter.next();
-                List<node_data> route = d.shortestPath(x.getKey(), current.getKey());
-                double routeWeight = d.shortestPathDist(x.getKey() , current.getKey());
-                if (route.size() > 1) {
-                    node_data routeNode = new DWGraph_DS.Node_data(route.get(1).getKey());
-                    routeNode.setWeight(routeWeight);
-                    routeMap.get(x.getKey()).put(current.getKey(), routeNode.getKey());
-
-                } else {
-                    routeMap.get((x.getKey())).put(current.getKey(), null);
-                }
+                _ar.setAgents(_ar.getAgents(game.getAgents(), gg));
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
-        String json = d.toString();
+        private void chooseStartNode ( int[] startnodes){
+            double distancemin = Double.POSITIVE_INFINITY;
+            double distancemax = 0;
 
+
+        }
+
+
+        private void makeRoutes (directed_weighted_graph gg){
+            dw_graph_algorithms d = new DWGraph_Algo();
+            d.init(gg);
+
+            for (node_data x : gg.getV()
+            ) {
+                routeMap.put(x.getKey(), new HashMap<>());
+                Iterator<node_data> iter = gg.getV().iterator();
+                while (iter.hasNext()) {
+                    node_data current = iter.next();
+                    List<node_data> route = d.shortestPath(x.getKey(), current.getKey());
+                    double routeWeight = d.shortestPathDist(x.getKey(), current.getKey());
+                    if (route.size() > 1) {
+                        node_data routeNode = new DWGraph_DS.Node_data(route.get(1).getKey());
+                        routeNode.setWeight(routeWeight);
+                        routeMap.get(x.getKey()).put(current.getKey(), routeNode.getKey());
+
+                    } else {
+                        routeMap.get((x.getKey())).put(current.getKey(), null);
+                    }
+                }
+            }
+
+            String json = d.toString();
+
+        }
     }
-}
 
